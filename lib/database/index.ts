@@ -19,7 +19,7 @@ export const connectToDatabase = async () => {
     });
 
   cached.conn = await cached.promise;
-
+  console.log("MongoDB 연결 완료");
   return cached.conn;
 };
 
