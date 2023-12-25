@@ -2,10 +2,13 @@
 
 // Next.js server actions file
 
-import { CreateUserParams } from "@/types";
+import { revalidatePath } from "next/cache";
+import { CreateUserParams, UpdateUserParams } from "@/types";
 import { handleError } from "../utils";
 import { connectToDatabase } from "../database";
-import User from "../database/models/user.model";
+import User from "@/lib/database/models/user.model";
+import Order from "@/lib/database/models/order.model";
+import Event from "@/lib/database/models/event.model";
 
 export const createUser = async (user: CreateUserParams) => {
   try {
