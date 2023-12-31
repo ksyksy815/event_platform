@@ -17,8 +17,13 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Input } from "../ui/input";
+import { ICategory } from "@/lib/database/models/category.model";
+import {
+  createCategory,
+  getAllCategories,
+} from "@/lib/actions/category.actions";
 
 type DropDownProps = {
   onChangeHandler: (value: string) => void;
@@ -29,7 +34,23 @@ const DropDown = ({ onChangeHandler, value }: DropDownProps) => {
   const [categories, setCategories] = useState<ICategory[]>([]);
   const [newCategory, setNewCategory] = useState<string>("");
 
-  const handleAddCategory = () => {};
+  const handleAddCategory = () => {
+    createCategory({
+      categoryName: newCategory.trim(),
+    }).then((category) => {
+      setCategories((prev) => [...prev, category]);
+    });
+  };
+
+  useEffect(() => {
+    const getCategories = async () => {
+      const categoryList = await getAllCategories();
+
+      if (!!categoryList) setCategories(categoryList as ICategory[]);
+    };
+
+    getCategories();
+  }, []);
 
   return (
     <Select onValueChange={onChangeHandler} defaultValue={value}>
@@ -50,7 +71,7 @@ const DropDown = ({ onChangeHandler, value }: DropDownProps) => {
         <AlertDialog>
           <AlertDialogTrigger
             className={`p-medium-14 flex w-full rouunded-sm py-3 pl-8 text-primary-500 hover:bg-primary-50 focus:text-primary-500`}>
-            Open
+            Add new category
           </AlertDialogTrigger>
           <AlertDialogContent className="bg-white">
             <AlertDialogHeader>
@@ -66,8 +87,7 @@ const DropDown = ({ onChangeHandler, value }: DropDownProps) => {
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={() => startTransition(handleAddCategory)}>
+              <AlertDialogAction onClick={() => handleAddCategory()}>
                 Add
               </AlertDialogAction>
             </AlertDialogFooter>
