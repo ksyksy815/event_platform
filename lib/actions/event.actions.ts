@@ -15,6 +15,7 @@ import {
   GetAllEventsParams,
   GetEventsByUserParams,
   GetRelatedEventsByCategoryParams,
+  GetRelatedEventsByAuthorParams,
 } from "@/types";
 
 const getCategoryByName = async (name: string) => {
@@ -185,6 +186,39 @@ export async function getRelatedEventsByCategory({
     const skipAmount = (Number(page) - 1) * limit;
     const conditions = {
       $and: [{ category: categoryId }, { _id: { $ne: eventId } }],
+    };
+
+    const eventsQuery = Event.find(conditions)
+      .sort({ createdAt: "desc" })
+      .skip(skipAmount)
+      .limit(limit);
+
+    const events = await populateEvent(eventsQuery);
+    const eventsCount = await Event.countDocuments(conditions);
+
+    return {
+      data: JSON.parse(JSON.stringify(events)),
+      totalPages: Math.ceil(eventsCount / limit),
+    };
+  } catch (error) {
+    handleError(error);
+  }
+}
+
+// GET EVENTS From The Same Author: EVENTS WITH SAME AUTHOR
+export async function getRelatedEventsByAuthor({
+  userId,
+  eventId,
+  limit = 3,
+  page = 1,
+}: GetRelatedEventsByAuthorParams) {
+  try {
+    await connectToDatabase();
+
+    const skipAmount = (Number(page) - 1) * limit;
+    const conditions = {
+      organizer: userId,
+      $and: [{ _id: { $ne: eventId } }],
     };
 
     const eventsQuery = Event.find(conditions)
